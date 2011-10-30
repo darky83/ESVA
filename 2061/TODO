@@ -1,0 +1,18 @@
+-----------------------------
+2.0.6.1 Development TODO list
+-----------------------------
+
+:Last update:	20111030
+
+
+In no particular order:
+
+- Upgrade CENTOS to final 5.x version (5.7).
+- Upgrade SpamAssassin to latest version.
+- Upgrade MailScanner to latest version.
+- Upgrade CLAM AV to latest version.
+- Add mirror list feature for update downloads.
+- Change links in webinterface to esvacommunity.
+- Change logo in webinterface.
+- Create new image file for new installations.
+- Test update script.
