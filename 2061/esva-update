@@ -2,17 +2,35 @@
 #
 # This script will update your ESVA 2.x to the latest version
 # 
-# Changes:
-# 
 
+#############################################
+# Settings                                  #
+#############################################
+PRIMARY="http://www.esvacommunity.com"
+SECUNDARY="http://www.global-domination.org"
+
+
+
+#############################################
+# Get the mirror list from the main servers #
+#############################################
+
+
+
+
+#############################################
+# Start update                              #
+#############################################
 cd /tmp
 rm -f esva2updater
-wget http://www.global-domination.org/download/esva2updater
 chmod 700 esva2updater
 logsave -a /tmp/esva2updater.log ./esva2updater
+
+#wget http://www.global-domination.org/download/esva2updater
 
 echo "#####################################"
 echo "#   Finished updating your system   #"
 echo "# You are now running ESVA version  #"
 cat /var/esva/currentversion
+echo "#   http://www.esvacommunity.com	  #"
 echo "#####################################"
