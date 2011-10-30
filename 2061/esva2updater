@@ -8,12 +8,14 @@
 # Original (c) Andrew MacLachlan
 #
 # For ESVA help see: http://www.esvacommunity.com/
- 
+# For changes see the 'CHANGES' File 
 
 #############################################
 # Some Settings				    #
 #############################################
 DLLOC="http://www.troublenow.org/esva/2061"	
+
+wwwpath=/var/www/html
 
 #############################################
 # Starting				    #
@@ -230,12 +232,34 @@ echo " Done Upgrading mailscanner to 4.84.3-1 "
 sleep 2
 
 #############################################
-# Removing ping home 			    #
+# Ping home	 			    #
 #############################################
 echo " Removing ping home "
 sleep 2
 
 rm /etc/cron.monthly/GD-Check
+
+#############################################
+# End ping home	 			    #
+#############################################
+
+#############################################
+# Start update the webinterface             #
+############################################# 
+echo " Changing links in the webinterface"
+  cd /tmp
+  sed -i '/ESVA Website/ c\    <LI><A HREF=\"http:\/\/www.esvacommunity.com\">ESVA Website<\/A>' $wwwpath/other.php
+  sed -i '/ESVA Support Forum/ c\    <LI><A HREF=\"http:\/\/www.esvacommunity.com\/forum\">ESVA Support Forum<\/A>' $wwwpath/other.php
+  sed -i '/Sam Spad/d' $wwwpath/other.php
+  sed -i '/DNS Report/d' $wwwpath/other.php
+  rm $wwwpath/images/ESVA-logo.gif
+  wget $DLLOC/ESVA-logo.gif
+  mv ESVA-logo.gif $wwwpath/images/
+
+echo " Done changing links in the webinterface"
+#############################################
+# END Update the webinterface               #
+#############################################
 
 #############################################
 # Write new issue file			    #
