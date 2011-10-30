@@ -1,0 +1,213 @@
+#!/bin/bash
+#
+#Update script for ESVA 2.x
+#Copyright 2009 Andrew MacLachlan, Global-Domination.org (andy.mac@global-domination.org)
+#This script will update your ESVA 2.x to the latest version
+#This script is downloaded and executed by /usr/local/sbin/esva-update
+
+#Only install updates for the current version, so yes, this updater is cumulative.
+
+DLLOC="http://www.global-domination.org/download/esvaupdates"
+
+if [ ! -f /var/esva/2059 ]; then
+    #Announce the version we are moving to
+    echo "Beginning the 2.0.5.9 update at " `date`
+    echo "The current user is $USER"
+
+    #Create the tracking file for this update
+    touch /var/esva/2059.started
+
+    #Make a copy of /etc/issue
+    cp /etc/issue /etc/issue.2059
+
+    #Update /etc/issue with the new version
+    sed -i 's/2.0.5.8/2.0.5.9/g' /etc/issue/2059
+
+    echo "Updating versions of esva-xxx scripts for better handling of no commandline arguments..."
+    cd /usr/local/sbin
+    echo "Backing up scripts..."
+    tar cvzf pre2059.tgz *
+    rm -f esva-domainshow
+    rm -f esva-mwusershow
+    wget $DLLOC/2059/esva-domainshow
+    wget $DLLOC/2059/esva-mwusershow
+    chmod 744 *
+
+    echo "Updating KAM.cf.sh for silent operation and better recovery..."
+    cd /etc/cron.daily
+    rm -f KAM.cf.sh
+    wget $DLLOC/2059/KAM.cf.sh
+    chmod 744 KAM.cf.sh
+
+    echo "Updating Postfix's configuration..."
+    cd /etc/postfix
+    cp main.cf main.cf.pre2059
+    postmap /etc/postfix/virtual
+    postconf -e "smtpd_client_restrictions = permit_sasl_authenticated, reject_rbl_client zen.spamhaus.org"
+    service postfix reload
+
+    echo "Tuning httpd to run a bit leaner..."
+    service httpd stop
+    cd /etc/httpd/conf/
+    mv httpd.conf httpd.conf.pre2059
+    wget $DLLOC/2059/httpd.conf
+    chmod 644 httpd.conf
+    service httpd start
+
+    echo "Configuring MySql to only listen to localhost..."
+    if [ `grep bind-address /etc/my.cnf` ]; then
+        echo "MySQL is already bound to localhost - skipping..."
+    else
+        cp /etc/my.cnf /etc/my.cnf.pre2059
+        sed -i '/\[mysqld\]/ a bind-address=127.0.0.1' /etc/my.cnf
+        service mysqld restart
+    fi
+
+    echo "Forcing Webmin to only listen to localhost..."
+    if [ `grep allow= /etc/webmin/miniserv.conf` ]; then
+        echo "Webmin is already bound to localhost - skipping..."
+    else
+        echo "allow=127.0.0.1">>/etc/webmin/miniserv.conf
+        service webmin restart
+    fi
+
+    echo "Configuring weekly SQLGrey updates..."
+    ln /usr/sbin/update_sqlgrey_config /etc/cron.weekly/update_sqlgrey_config
+    /etc/cron.weekly/update_sqlgrey_config
+
+    echo "Adjusting SA scores for a few rules..."
+    sed -i '/^score FUZZY_OCR_KNOWN_HASH/d' /etc/MailScanner/spam.assassin.prefs.conf
+    echo "score FUZZY_OCR_KNOWN_HASH 0.1">>/etc/MailScanner/spam.assassin.prefs.conf
+    sed -i '/^score RCVD_IN_DNSWL_LOW/d' /etc/MailScanner/spam.assassin.prefs.conf
+    echo "score RCVD_IN_DNSWL_LOW 0.0">>/etc/MailScanner/spam.assassin.prefs.conf
+
+    ######################
+    #YUM Modifications
+
+    #Clean up YUM to avoid unsubscriptable errors
+    yum clean all
+
+    #Configure YUM Priorities
+    yum install yum-priorities -y
+    echo 'priority=1'>>/etc/yum.repos.d/CentOS-Base.repo
+    echo 'priority=1'>>/etc/yum.repos.d/CentOS-Media.repo
+    if [ -f /etc/yum.repos.d/XenSource.repo ]; then
+        echo 'priority=5'>>/etc/yum.repos.d/XenSource.repo
+    fi
+    echo 'priority=10'>>/etc/yum.repos.d/rpmforge.repo
+
+    # stop some packages from updating from rpmforge
+    echo 'exclude=perl-IO'>>/etc/yum.repos.d/rpmforge.repo
+
+    #Remove the restriction on perl modules for YUM
+    sed -i "/exclude=perl*/d" /etc/yum.conf
+
+    # Globally disable perl version updates, because they break too many things.
+    # echo 'exclude=perl'>>/etc/yum.conf
+
+    #Stop MailScanner before we go any further
+    service MailScanner stop
+
+    ######################
+    #Remove some problematc packages and update the system
+    #Removed packages will be re-installed by the MailScanner update.
+
+    rpm -e --nodeps perl-Math-BigRat
+    rpm -e --nodeps perl-bignum
+    rpm -e --nodeps perl-File-Temp
+    rpm -e --nodeps perl-Math-BigInt
+
+    #Update installed packages
+    yum update yum -y
+    yum update --skip-broken -y
+
+    ######################
+    #Silence errors logged during WebMin startup
+    yum install pam-devel perl-Authen-PAM -y
+    echo '#%PAM-1.0'>/etc/pam.d/webmin
+    echo 'auth  required pam_nologin.so'>>/etc/pam.d/webmin
+    echo 'auth  include   system-auth'>>/etc/pam.d/webmin
+    echo 'accountinclude  system-auth'>>/etc/pam.d/webmin
+    echo 'password   include  system-auth'>>/etc/pam.d/webmin
+    echo 'sessioninclude  system-auth'>>/etc/pam.d/webmin
+
+    ######################
+    # Update core software versions
+
+    #Upgrade MailScanner
+    service MailScanner stop
+    cd  /tmp
+    wget http://www.mailscanner.info/files/4/rpm/MailScanner-4.84.3-1.rpm.tar.gz
+    tar -xvzf MailScanner-*.rpm.tar.gz
+    cd MailScanner*
+    ./install.sh
+    service sendmail stop
+    chkconfig sendmail off
+    chkconfig MailScanner on
+    cd /etc/MailScanner
+    upgrade_MailScanner_conf MailScanner.conf MailScanner.conf.rpmnew > MailScanner.new
+    mv -f MailScanner.conf MailScanner.old
+    mv -f MailScanner.new  MailScanner.conf
+    cd /tmp
+    rm -rf MailScanner*
+
+    #Fix known problems caused by the MailScanner upgrade process
+    sed -i '/^Incoming Queue Dir/ c\Incoming Queue Dir = \/var\/spool\/postfix\/hold' /etc/MailScanner/MailScanner.conf
+
+    #Upgrade SpamAssassin
+    cd /tmp
+    wget http://www.mailscanner.info/files/4/install-Clam-SA-latest.tar.gz
+    tar -xvzf install-Clam-SA-latest.tar.gz
+    cd install-Clam*
+    echo 'n'>answers.txt
+    echo ''>>answers.txt
+    #echo ''>>answers.txt
+    cat answers.txt|./install.sh
+    cd /tmp
+    rm -rf install-Clam*
+
+    #Force an update of ClamAV definitions...
+    service clamd restart
+    freshclam
+
+    echo "Restarting MailScanner after all these changes..."
+    service MailScanner restart
+
+    rm -f /etc/issue
+    mv /etc/issue.2059 /etc/issue
+
+    #Finalise the tracking file for this update
+    mv /var/esva/2059.started /var/esva/2059
+    echo "# 2.0.5.9   #">/var/esva/currentversion
+    echo "Completed the 2.0.5.9 update at " `date`
+    init 6
+fi
+
+if [ -f /tmp/2060.test ]; then
+    if [ ! -f /var/esva/2060 ]; then
+        #Announce the version we are moving to
+        echo "Beginning the 2.0.6.0 update at " `date`
+        echo "The current user is $USER"
+
+        #Create the tracking file for this update
+        touch /var/esva/2060.started
+
+        #Update /etc/issue with the new version
+        sed -i 's/2.0.5.9/2.0.6.0/g' /etc/issue
+        sed -i 's/2.0.5.8/2.0.6.0/g' /etc/issue
+
+        #Fix MailScanner dependencies issue...
+        sed -i 's/^exclude=/#exclude=/g' /etc/yum.repos.d/rpmforge.repo
+        echo 'exclude=perl-IO perl-Scalar-List-Utils perl-bignum perl-Test-Harness perl-Test-Simple perl-Sys-Syslog perl-File-Temp perl-Math-BigRat'>>/etc/yum.repos.d/rpmforge.repo
+
+        #Run a yum update
+        yum update -y
+
+         #Finalise the tracking file for this update
+        mv /var/esva/2060.started /var/esva/2059
+        echo "# 2.0.6.0   #">/var/esva/currentversion
+        echo "Completed the 2.0.6.0 update at " `date`
+        init 6
+    fi
+fi
+
