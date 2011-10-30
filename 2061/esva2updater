@@ -1,0 +1,9 @@
+#!/bin/bash
+#
+# Update script for ESVA 2.0.6.1
+# This script will update your esva 2.x to the latest 2.0.x version
+# This script is downloaded and executed by /usr/local/sbin/esva-update
+# 
+# Original author Andrew MacLachlan
+# Original (c) Andrew MacLachlan
+
