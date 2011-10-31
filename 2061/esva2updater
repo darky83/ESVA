@@ -10,26 +10,81 @@
 # For ESVA help see: http://www.esvacommunity.com/
 # For changes see the 'CHANGES' File 
 
+
 #############################################
 # Some Settings				    #
 #############################################
-DLLOC="http://www.troublenow.org/esva/2061"	
 
+mirrorlist=mirrorlist.txt
 wwwpath=/var/www/html
 
 #############################################
-# Starting				    #
+# Define the mirror we are going to use     #
 #############################################
-echo " Did you make a snapshot of your system?  "
-echo " You will now have 20 Seconds to abort (CTRL C) "
-sleep 20
 
-echo " Staring ESVA 2.0.6.1 update "
-touch /var/esva/2061.started
+PM1="http://www.esvacommunity.com"
+PM2="http://www.global-domination.org"
+PM3="http://www.troublenow.org/esva/"
+
+cd /tmp
+if [ -f /tmp/$mirrorlist ]; then
+   mv $mirrorlist $mirrorlist.old
+   wget $PM1/mirrorlist.txt
+fi
+   cat /tmp/$mirrorlist | grep #ESVA-MIRRORLIST#
+
+DLLOC=""	
+
+#!/bin/bash
+#############################################
+# Settings                                  #
+#############################################
+mirrorlist=mirrorlist.txt
+
+PM1="http://www.esvacommunity.com"
+PM2="http://www.troublenow.org/esva/"
+#############################################
+
+#############################################
+# Mirror list function                      #
+#############################################
+function MirrorList()
+{
+cd /tmp
+if [ -f /tmp/$mirrorlist ]; then
+   mv $mirrorlist $mirrorlist.old
+fi
+
+echo "[ESVA] Grabbing mirror list from $PM1"
+wget $PM1/$mirrorlist
+if [ -f /tmp/$mirrorlist ]; then
+   if [ "`head -1 $mirrorlist`" == '#ESVA-MIRRORLIST#' ]; then
+      echo "[ESVA] Got a mirrorlist, selecting a mirror"
+      DLLOC="$PM1"
+   fi
+else
+   echo "[ESVA] failed to get $PM1/$mirrorlist trying second server."
+   wget $PM2/$mirrorlist
+   if [ -f /tmp/$mirrorlist ]; then
+      if [ "`head -1 $mirrorlist`" == '#ESVA-MIRRORLIST#' ]; then
+         echo "[ESVA] Got a mirrorlist, selecting a mirror"
+         DLLOC="$PM2"
+      fi
+   else
+      echo "[ESVA] No available servers to get the mirror list, please try again later"
+   fi
+fi
+echo "[ESVA] using $DLLOC as mirror"
+
+FUNCTION-ESVA2059
+}
+#############################################
 
 #############################################
 # 2059 updates				    #
 #############################################
+function FUNCTION-ESVA2059()
+{
 echo " Starting 2.0.5.9 updates "
 
 echo " - Updating versions of esva-xxx scripts for better handling of no commandline arguments...  "
@@ -101,9 +156,15 @@ sleep 1
 echo " Done with the 2.0.5.9 updates "
 sleep 2
 
+FUNCTION-SystemUpgrade1
+}
+#############################################
+
 #############################################
 # Upgrade the system to latest version	    #
 #############################################
+function FUNCTION-SystemUpgrade1()
+{
 echo " Upgrading the system part 1"
 sleep 2
 
@@ -160,10 +221,16 @@ echo " - Remove some packages "
  echo 'password   include  system-auth'>>/etc/pam.d/webmin
  echo 'sessioninclude  system-auth'>>/etc/pam.d/webmin
  echo " Done system upgrade part 1 "
- 
+
+FUNCTION-MailScanner
+}
+#############################################
+
 #############################################
 # Upgrade Mailscanner 			    #
 #############################################
+function FUNCTION-MailScanner()
+{
 echo " Upgrading mailscanner to 4.84.3-1 "
 sleep 1
   service MailScanner stop
@@ -187,9 +254,15 @@ sleep 1
   echo " Done Upgrading mailscanner to 4.84.3-1 "
 sleep 2
 
+FUNCTION-SpamAssassin
+}
+#############################################
+
 #############################################
 # Upgrade SpamAssassin to latest	    #
 ############################################# 
+function FUNCTION-SpamAssassin()
+{
  echo " Upgrading SpamAssasin to Latest "
     cd /tmp
     wget http://www.mailscanner.info/files/4/install-Clam-SA-latest.tar.gz
@@ -217,10 +290,16 @@ sleep 2
 
 echo " Done upgrading SpamAssasin to Latest "
 
+FUNCTION-SystemUpgrade2
+}
+#############################################
+
 #############################################
 # Upgrade system part 2			    #
 #############################################
-echo " Upgrading the system part 1"
+function FUNCTION-SystemUpgrade2()
+{
+echo " Upgrading the system part 2"
 sleep 2
 
 sed -i "/exclude=perl*/d" /etc/yum.conf
@@ -231,21 +310,29 @@ yum update -y
 echo " Done Upgrading mailscanner to 4.84.3-1 "
 sleep 2
 
+FUNCTION-PingHome
+}
+#############################################
+
 #############################################
 # Ping home	 			    #
 #############################################
+function FUNCTION-PingHome()
+{
 echo " Removing ping home "
 sleep 2
 
 rm /etc/cron.monthly/GD-Check
 
-#############################################
-# End ping home	 			    #
+FUNCTION-WebInterface
+}
 #############################################
 
 #############################################
 # Start update the webinterface             #
 ############################################# 
+function FUNCTION-WebInterface()
+{
 echo " Changing links in the webinterface"
   cd /tmp
   sed -i '/ESVA Website/ c\    <LI><A HREF=\"http:\/\/www.esvacommunity.com\">ESVA Website<\/A>' $wwwpath/other.php
@@ -257,13 +344,16 @@ echo " Changing links in the webinterface"
   mv ESVA-logo.gif $wwwpath/images/
 
 echo " Done changing links in the webinterface"
-#############################################
-# END Update the webinterface               #
+
+FUNCTION-IssueFile
+}
 #############################################
 
 #############################################
 # Write new issue file			    #
 #############################################
+function FUNCTION-IssueFile()
+{
 echo " Writing new issue file. "
 sleep 1
 mv /etc/issue /etc/issue.pre2061
@@ -280,9 +370,15 @@ echo " " >> /etc/issue
 echo " " >> /etc/issue
 echo "................................................. " >> /etc/issue
 
+FUNCTION-VersionFile
+}
+#############################################
+
 #############################################
 # Write new Version file		    #
 #############################################
+function FUNCTION-VersionFile()
+{
 echo " Writing new version file. "
 sleep 2
 mv /var/esva/2061.started /var/esva/2061
@@ -290,5 +386,20 @@ echo "# 2.0.6.1   #">/var/esva/currentversion
 echo "Completed the 2.0.6.1 update at " `date`
 sleep 2
 init 6 
+}
+#############################################
 
+
+#############################################
+# Where to start                            #
+#############################################
+echo " Did you make a snapshot of your system?  "
+echo " You will now have 20 Seconds to abort (CTRL C) "
+sleep 20
+
+echo " Staring ESVA 2.0.6.1 update "
+touch /var/esva/2061.started
+
+MirrorList
+#############################################
 #EOF
