@@ -10,36 +10,12 @@
 # For ESVA help see: http://www.esvacommunity.com/
 # For changes see the 'CHANGES' File 
 
-
 #############################################
 # Some Settings				    #
 #############################################
 
 mirrorlist=mirrorlist.txt
 wwwpath=/var/www/html
-
-#############################################
-# Define the mirror we are going to use     #
-#############################################
-
-PM1="http://www.esvacommunity.com"
-PM2="http://www.global-domination.org"
-PM3="http://www.troublenow.org/esva/"
-
-cd /tmp
-if [ -f /tmp/$mirrorlist ]; then
-   mv $mirrorlist $mirrorlist.old
-   wget $PM1/mirrorlist.txt
-fi
-   cat /tmp/$mirrorlist | grep #ESVA-MIRRORLIST#
-
-DLLOC=""	
-
-#!/bin/bash
-#############################################
-# Settings                                  #
-#############################################
-mirrorlist=mirrorlist.txt
 
 PM1="http://www.esvacommunity.com"
 PM2="http://www.troublenow.org/esva/"
