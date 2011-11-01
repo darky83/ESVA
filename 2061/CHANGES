@@ -6,8 +6,9 @@
 ------------------
 File: esva2updater
 ------------------
-20111030 - Created initial file
-
+20111101 - added option to get DLLOC from 3 main servers
+20111031 - Modified script to use bash functions
+20111030 - Created initial file (main source 2061UO script)
 
 -----------------
 File: esva-update
