@@ -25,7 +25,7 @@ PM3="http://www.troublenow.org/esva"
 #############################################
 # Grabbing a working mirror                 #
 #############################################
-function MirrorList()
+function FileList()
 {
 cd /tmp
 if [ -f /tmp/$filelist ]; then
@@ -37,7 +37,7 @@ wget $PM1/$filelist
 if [ -f /tmp/$filelist ]; then
    if [ "`head -1 $filelist`" == '#ESVA-FILELIST#' ]; then
       echo "[ESVA] Got a filelist."
-      DLLOC="$PM1"
+      DLHOST="$PM1"
    fi
 else
    echo "[ESVA] failed to get $PM1/$filelist trying second server."
@@ -45,7 +45,7 @@ else
    if [ -f /tmp/$filelist ]; then
       if [ "`head -1 $filelist`" == '#ESVA-FILELIST#' ]; then
          echo "[ESVA] Got a filelist."
-         DLLOC="$PM2"
+         DLHOST="$PM2"
       fi
    else
       echo "[ESVA] failed to get $PM2/$filelist trying last server."
@@ -53,14 +53,15 @@ else
       if [ -f /tmp/$filelist ]; then
          if [ "`head -1 $filelist`" == '#ESVA-FILELIST#' ]; then
             echo "[ESVA] Got a filelist."
-            DLLOC="$PM3"
+            DLHOST="$PM3"
          fi
       else
          echo "[ESVA] No available servers to get the file list, please try again later"
       fi
    fi
 fi
-echo "[ESVA] using $DLLOC as mirror"
+echo "[ESVA] using $DLHOST as mirror"
+DLLOC=$DLHOST/update/2061
 
 FUNCTION-ESVA2059
 }
@@ -71,12 +72,12 @@ FUNCTION-ESVA2059
 #############################################
 function FUNCTION-ESVA2059()
 {
-echo " Starting 2.0.5.9 updates "
+echo "[ESVA] Starting 2.0.5.9 updates "
 
-echo " - Updating versions of esva-xxx scripts for better handling of no commandline arguments...  "
+echo "[ESVA] - Updating versions of esva-xxx scripts for better handling of no commandline arguments...  "
 sleep 1
 	cd /usr/local/sbin
-    echo " -- Backing up scripts... "
+    echo "[ESVA] -- Backing up scripts... "
     tar cvzf pre2061.tgz *
     rm -f esva-domainshow
     rm -f esva-mwusershow
@@ -84,14 +85,14 @@ sleep 1
     /usr/bin/wget $DLLOC/esva-mwusershow
     chmod 744 *
 
-echo " - Updating KAM.cf.sh for silent operation and better recovery... "
+echo "[ESVA] - Updating KAM.cf.sh for silent operation and better recovery... "
 sleep 1
     cd /etc/cron.daily
     rm -f KAM.cf.sh
     /usr/bin/wget $DLLOC/KAM.cf.sh
     chmod 744 KAM.cf.sh
 
-echo " - Updating Postfix's configuration... "
+echo "[ESVA] - Updating Postfix's configuration... "
 sleep 1
     cd /etc/postfix
     cp main.cf main.cf.pre2061
@@ -99,7 +100,7 @@ sleep 1
     postconf -e "smtpd_client_restrictions = permit_sasl_authenticated, reject_rbl_client zen.spamhaus.org"
     service postfix reload
 	
-echo " - Tuning httpd to run a bit leaner... "
+echo "[ESVA] - Tuning httpd to run a bit leaner... "
 sleep 1
     service httpd stop
     cd /etc/httpd/conf/
@@ -108,7 +109,7 @@ sleep 1
     chmod 644 httpd.conf
     service httpd start
 	
-echo " - Configuring MySql to only listen to localhost... "
+echo "[ESVA] - Configuring MySql to only listen to localhost... "
 sleep 1
     if [ `grep bind-address /etc/my.cnf` ]; then
         echo " -- MySQL is already bound to localhost - skipping... "
@@ -118,28 +119,28 @@ sleep 1
         service mysqld restart
     fi
 
-echo " - Forcing Webmin to only listen to localhost... "
+echo "[ESVA] - Forcing Webmin to only listen to localhost... "
 sleep 1
     if [ `grep allow= /etc/webmin/miniserv.conf` ]; then
-        echo " Webmin is already bound to localhost - skipping... "
+        echo "[ESVA] -- Webmin is already bound to localhost - skipping... "
     else
         echo "allow=127.0.0.1">>/etc/webmin/miniserv.conf
         service webmin restart
     fi
 	
-echo " - Configuring weekly SQLGrey updates... "
+echo "[ESVA] - Configuring weekly SQLGrey updates... "
 sleep 1
     ln /usr/sbin/update_sqlgrey_config /etc/cron.weekly/update_sqlgrey_config
     /etc/cron.weekly/update_sqlgrey_config
 
-echo " - Adjusting SA scores for a few rules... "
+echo "[ESVA] - Adjusting SA scores for a few rules... "
 sleep 1
     sed -i '/^score FUZZY_OCR_KNOWN_HASH/d' /etc/MailScanner/spam.assassin.prefs.conf
     echo "score FUZZY_OCR_KNOWN_HASH 0.1">>/etc/MailScanner/spam.assassin.prefs.conf
     sed -i '/^score RCVD_IN_DNSWL_LOW/d' /etc/MailScanner/spam.assassin.prefs.conf
     echo "score RCVD_IN_DNSWL_LOW 0.0">>/etc/MailScanner/spam.assassin.prefs.conf
 
-echo " Done with the 2.0.5.9 updates "
+echo "[ESVA] Done with the 2.0.5.9 updates "
 sleep 2
 
 FUNCTION-SystemUpgrade1
@@ -151,17 +152,17 @@ FUNCTION-SystemUpgrade1
 #############################################
 function FUNCTION-SystemUpgrade1()
 {
-echo " Upgrading the system part 1"
+echo "[ESVA] Upgrading the system part 1"
 sleep 2
 
  #Clean up YUM to avoid unsubscriptable errors
  yum clean all
 
- echo " - Backing up yum configs "
+ echo "[ESVA] - Backing up yum configs "
  sleep 1
  mv /etc/yum.conf /etc/yum.conf.pre2061
  
- echo " - Setting new yum configs "
+ echo "[ESVA] - Setting new yum configs "
  cd /etc/
  /usr/bin/wget $DLLOC/yum.conf
  mv /etc/yum.repos.d/rpmforge.repo /etc/yum.repos.d/rpmforge.repo.pre2061
@@ -185,7 +186,7 @@ sleep 2
  
  #Remove some problematc packages and update the system
  #Removed packages will be re-installed by the MailScanner update.
-echo " - Remove some packages "
+echo "[ESVA] - Remove some packages "
  sleep 1
  rpm -e --nodeps perl-Math-BigRat
  rpm -e --nodeps perl-bignum
@@ -193,7 +194,7 @@ echo " - Remove some packages "
  rpm -e --nodeps perl-Math-BigInt
 
  #Update installed packages
- echo " Start system upgrade "
+ echo "[ESVA] Start system upgrade "
  sleep 2
  yum update yum -y
  yum update --skip-broken -y
@@ -217,7 +218,7 @@ FUNCTION-MailScanner
 #############################################
 function FUNCTION-MailScanner()
 {
-echo " Upgrading mailscanner to 4.84.3-1 "
+echo "[ESVA] Upgrading mailscanner to 4.84.3-1 "
 sleep 1
   service MailScanner stop
   cd /tmp
@@ -237,7 +238,7 @@ sleep 1
 
   #Fix known problems caused by the MailScanner upgrade process
   sed -i '/^Incoming Queue Dir/ c\Incoming Queue Dir = \/var\/spool\/postfix\/hold' /etc/MailScanner/MailScanner.conf
-  echo " Done Upgrading mailscanner to 4.84.3-1 "
+  echo "[ESVA] Done Upgrading mailscanner to 4.84.3-1 "
 sleep 2
 
 FUNCTION-SpamAssassin
@@ -249,7 +250,7 @@ FUNCTION-SpamAssassin
 ############################################# 
 function FUNCTION-SpamAssassin()
 {
- echo " Upgrading SpamAssasin to Latest "
+ echo "[ESVA] Upgrading SpamAssasin to Latest "
     cd /tmp
     wget http://www.mailscanner.info/files/4/install-Clam-SA-latest.tar.gz
     tar -xvzf install-Clam-SA-latest.tar.gz
@@ -271,10 +272,10 @@ function FUNCTION-SpamAssassin()
 	# fix socket file in mailscanner.conf
 	sed -i '/^Clamd Socket/ c\Clamd Socket = \/var\/run\/clamav\/clamd.sock' /etc/MailScanner/MailScanner.conf
 	
-	echo " - Restarting MailScanner after all these changes..."
+	echo "[ESVA] - Restarting MailScanner after all these changes..."
     service MailScanner restart
 
-echo " Done upgrading SpamAssasin to Latest "
+echo "[ESVA] Done upgrading SpamAssasin to Latest "
 
 FUNCTION-SystemUpgrade2
 }
@@ -285,7 +286,7 @@ FUNCTION-SystemUpgrade2
 #############################################
 function FUNCTION-SystemUpgrade2()
 {
-echo " Upgrading the system part 2"
+echo "[ESVA] Upgrading the system part 2"
 sleep 2
 
 sed -i "/exclude=perl*/d" /etc/yum.conf
@@ -293,7 +294,7 @@ echo 'exclude=perl-IO perl-Scalar-List-Utils perl-bignum perl-Test-Harness perl-
 
 yum update -y
 
-echo " Done Upgrading mailscanner to 4.84.3-1 "
+echo "[ESVA] Done Upgrading mailscanner to 4.84.3-1 "
 sleep 2
 
 FUNCTION-PingHome
@@ -305,10 +306,13 @@ FUNCTION-PingHome
 #############################################
 function FUNCTION-PingHome()
 {
-echo " Removing ping home "
+echo "[ESVA] Modifying PingHome"
 sleep 2
 
 rm /etc/cron.monthly/GD-Check
+cd /etc/cron.monthly
+wget $DLLOC/Ping-Home
+chmod 755 Ping-Home
 
 FUNCTION-WebInterface
 }
@@ -319,7 +323,7 @@ FUNCTION-WebInterface
 ############################################# 
 function FUNCTION-WebInterface()
 {
-echo " Changing links in the webinterface"
+echo "[ESVA] Changing links in the webinterface"
   cd /tmp
   sed -i '/ESVA Website/ c\    <LI><A HREF=\"http:\/\/www.esvacommunity.com\">ESVA Website<\/A>' $wwwpath/other.php
   sed -i '/ESVA Support Forum/ c\    <LI><A HREF=\"http:\/\/www.esvacommunity.com\/forum\">ESVA Support Forum<\/A>' $wwwpath/other.php
@@ -329,7 +333,7 @@ echo " Changing links in the webinterface"
   wget $DLLOC/ESVA-logo.gif
   mv ESVA-logo.gif $wwwpath/images/
 
-echo " Done changing links in the webinterface"
+echo "[ESVA] Done changing links in the webinterface"
 
 FUNCTION-IssueFile
 }
@@ -340,7 +344,7 @@ FUNCTION-IssueFile
 #############################################
 function FUNCTION-IssueFile()
 {
-echo " Writing new issue file. "
+echo "[ESVA] Writing new issue file. "
 sleep 1
 mv /etc/issue /etc/issue.pre2061
 echo " *********************************************** " > /etc/issue
@@ -365,11 +369,11 @@ FUNCTION-VersionFile
 #############################################
 function FUNCTION-VersionFile()
 {
-echo " Writing new version file. "
+echo "[ESVA] Writing new version file. "
 sleep 2
 mv /var/esva/2061.started /var/esva/2061
 echo "# 2.0.6.1   #">/var/esva/currentversion
-echo "Completed the 2.0.6.1 update at " `date`
+echo "[ESVA] Completed the 2.0.6.1 update at " `date`
 sleep 2
 init 6 
 }
@@ -379,13 +383,13 @@ init 6
 #############################################
 # Where to start                            #
 #############################################
-echo " Did you make a snapshot of your system?  "
-echo " You will now have 20 Seconds to abort (CTRL C) "
+echo "[ESVA] Did you make a snapshot of your system?  "
+echo "[ESVA] You will now have 20 Seconds to abort (CTRL C) "
 sleep 20
 
-echo " Staring ESVA 2.0.6.1 update "
+echo "[ESVA] Staring ESVA 2.0.6.1 update "
 touch /var/esva/2061.started
 
-MirrorList
+FileList
 #############################################
 #EOF
