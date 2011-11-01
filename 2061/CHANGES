@@ -1,16 +1,67 @@
 ---------------
 2.0.6.1 Changes
 ---------------
-
+Changes to files are documented here
 
 ------------------
 File: esva2updater
 ------------------
-20111101 - added option to get DLLOC from 3 main servers
+20111101 - Added option to get DLLOC from 3 main servers
+	   Started all echo's with [ESVA] for easy finding in logging
+	   Cleaned up some typo's
 20111031 - Modified script to use bash functions
 20111030 - Created initial file (main source 2061UO script)
 
------------------
-File: esva-update
------------------
-20111030 - Created initial file
+
+-------------------------------
+File: update/2061/ESVA-logo.gif
+-------------------------------
+20111101 - Created initial file (modified url in logo)
+
+
+---------------------------
+File: update/2061/KAM.cf.sh
+---------------------------
+20111101 - Created initial file (esva 2059 version)
+
+
+---------------------------
+File: update/2061/Ping-Home
+---------------------------
+20111101 - Created initial file (empty)
+
+
+---------------------------------
+File: update/2061/esva-domainshow
+---------------------------------
+20111101 - Created initial file (esva 2059 version)
+
+
+---------------------------------
+File: update/2061/esva-mwusershow
+--------------------------------
+20111101 - Created initial file (esva 2059 version)
+
+
+-----------------------------
+File: update/2061/esva-update
+-----------------------------
+20111030 - Created initial file (esva 2059 version)
+
+
+----------------------------
+File: update/2061/httpd.conf
+----------------------------
+20111101 - Created initial file (esva 2059 version)
+
+
+-------------------------------
+File: update/2061/rpmforge.repo
+-------------------------------
+20111101 - Created initial file
+
+
+--------------------------
+File: update/2061/yum.conf
+--------------------------
+20111101 - Created initial file
