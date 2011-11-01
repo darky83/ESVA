@@ -14,40 +14,50 @@
 # Some Settings				    #
 #############################################
 
-mirrorlist=mirrorlist.txt
+filelist=filelist.txt
 wwwpath=/var/www/html
 
 PM1="http://www.esvacommunity.com"
-PM2="http://www.troublenow.org/esva/"
+PM2="http://www.global-domination.org"
+PM3="http://www.troublenow.org/esva"
 #############################################
 
 #############################################
-# Mirror list function                      #
+# Grabbing a working mirror                 #
 #############################################
 function MirrorList()
 {
 cd /tmp
-if [ -f /tmp/$mirrorlist ]; then
-   mv $mirrorlist $mirrorlist.old
+if [ -f /tmp/$filelist ]; then
+   mv $filelist $filelist.old
 fi
 
-echo "[ESVA] Grabbing mirror list from $PM1"
-wget $PM1/$mirrorlist
-if [ -f /tmp/$mirrorlist ]; then
-   if [ "`head -1 $mirrorlist`" == '#ESVA-MIRRORLIST#' ]; then
-      echo "[ESVA] Got a mirrorlist, selecting a mirror"
+echo "[ESVA] Grabbing file list from $PM1"
+wget $PM1/$filelist
+if [ -f /tmp/$filelist ]; then
+   if [ "`head -1 $filelist`" == '#ESVA-FILELIST#' ]; then
+      echo "[ESVA] Got a filelist."
       DLLOC="$PM1"
    fi
 else
-   echo "[ESVA] failed to get $PM1/$mirrorlist trying second server."
-   wget $PM2/$mirrorlist
-   if [ -f /tmp/$mirrorlist ]; then
-      if [ "`head -1 $mirrorlist`" == '#ESVA-MIRRORLIST#' ]; then
-         echo "[ESVA] Got a mirrorlist, selecting a mirror"
+   echo "[ESVA] failed to get $PM1/$filelist trying second server."
+   wget $PM2/$filelist
+   if [ -f /tmp/$filelist ]; then
+      if [ "`head -1 $filelist`" == '#ESVA-FILELIST#' ]; then
+         echo "[ESVA] Got a filelist."
          DLLOC="$PM2"
       fi
    else
-      echo "[ESVA] No available servers to get the mirror list, please try again later"
+      echo "[ESVA] failed to get $PM2/$filelist trying last server."
+      wget $PM3/$filelist
+      if [ -f /tmp/$filelist ]; then
+         if [ "`head -1 $filelist`" == '#ESVA-FILELIST#' ]; then
+            echo "[ESVA] Got a filelist."
+            DLLOC="$PM3"
+         fi
+      else
+         echo "[ESVA] No available servers to get the file list, please try again later"
+      fi
    fi
 fi
 echo "[ESVA] using $DLLOC as mirror"
