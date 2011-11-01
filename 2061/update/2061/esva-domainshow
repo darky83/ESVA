@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+#esva-domainshow
+#Copyright 2008 Andrew MacLachlan, GD Consultants Ltd (andrew@gdcon.net)
+#This script will show all domains configured on your ESVA 2.x host
+
+if [ $1 = "--help" ]; then
+	echo "esva-domainshow usage:"
+	echo "esva-domainshow"
+	echo ""
+	exit 0
+fi
+
+echo ""
+echo "/etc/postfix/transport"
+echo "-------------------------------"
+grep -v "#" /etc/postfix/transport
+
+echo ""
+echo "MailScanner HTML Rules"
+echo "-------------------------------"
+grep -v "#" /etc/MailScanner/rules/sig.html.rules
+
+echo ""
+echo "MailScanner Text Rules"
+echo "-------------------------------"
+grep -v "#" /etc/MailScanner/rules/sig.text.rules
+
+echo ""
+echo "SASL Accounts"
+echo "-------------------------------"
+esva-saslshow
+
+echo ""
+echo "MailWatch Accounts"
+echo "-------------------------------"
+#the following SQL is courtesy of Andrew Taylor (Toady)
+mysql mailscanner -u root --execute="select username, fullname, type from users where type = 'D';"

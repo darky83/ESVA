@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+#esva-mwusershow
+#Copyright 2008 Andrew Taylor
+#This script will show all mailwatch users accounts configured on your ESVA 2.x host
+
+if [ "$1" = "--help" ]; then
+        echo "esva-mwusershow usage:"
+        echo "esva-mwusershow"
+        echo ""
+        exit 0
+fi
+
+echo ""
+echo "MailWatch User Accounts"
+echo "-------------------------------"
+mysql mailscanner -u root --execute="SELECT username, fullname FROM users WHERE type = 'U' ORDER BY username ASC;"
+
