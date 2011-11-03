@@ -6,6 +6,9 @@ Changes to files are documented here
 ------------------
 File: esva2updater
 ------------------
+20111103 - Added VersionCheck
+	   Cleaned up code
+           Added esva-update File replacement
 20111101 - Added option to get DLLOC from 3 main servers
 	   Started all echo's with [ESVA] for easy finding in logging
 	   Cleaned up some typo's
@@ -47,7 +50,8 @@ File: update/2061/esva-mwusershow
 File: update/2061/esva-update
 -----------------------------
 20111030 - Created initial file (esva 2059 version)
-
+20111103 - Added mirror server feature
+   	   Added user check
 
 ----------------------------
 File: update/2061/httpd.conf
