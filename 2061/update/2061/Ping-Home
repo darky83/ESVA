@@ -1,1 +1,17 @@
+#!/bin/bash
+#
+# Monthly Ping-Home script to determine the ESVA install base
+# Possible in the future we add a version check to see if there is 
+# a new ESVA version.
 
+MIRRORS="http://www.esvacommunity.com http://www.global-domination.org"
+VERSION="2061"
+
+cd /tmp
+for mirror in $MIRRORS
+  do
+    wget $mirror/Ping-Home/$VERSION.txt
+    rm -f $VERSION.txt
+  done
+exit 0
+#EOF
