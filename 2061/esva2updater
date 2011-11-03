@@ -35,6 +35,9 @@ if [ `cat /var/esva/currentversion` == $VERSION ]; then
 else
    echo "[ESVA] You are running esva version `cat /var/esva/currentversion`"
    echo "[ESVA] Starting upgrade to $VERSION"
+   echo "[ESVA] You may see some error's during the system upgrade"
+   echo "[ESVA] These will be resolved later on in the upgrade process"
+   sleep 10
    FUNCTION-FileList
 fi
 }
