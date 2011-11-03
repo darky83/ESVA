@@ -29,7 +29,7 @@ File: update/2061/KAM.cf.sh
 File: update/2061/Ping-Home
 ---------------------------
 20111101 - Created initial file (empty)
-
+20111103 - Added check feature to check 2 domains
 
 ---------------------------------
 File: update/2061/esva-domainshow
