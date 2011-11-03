@@ -14,6 +14,8 @@
 # Some Settings				    #
 #############################################
 
+VERSION=2.0.6.1
+sVERSION=2061
 filelist=filelist.txt
 wwwpath=/var/www/html
 
@@ -25,7 +27,22 @@ PM3="http://www.troublenow.org/esva"
 #############################################
 # Grabbing a working mirror                 #
 #############################################
-function FileList()
+function VersionCheck()
+{
+if [ `cat /var/esva/currentversion` == $VERSION ]; then
+   echo "[ESVA] You are already running version $VERSION, no update needed"
+   exit 0
+else
+   echo "[ESVA] You are running esva version `cat /var/esva/currentversion`"
+   echo "[ESVA] Starting upgrade to $VERSION"
+   FUNCTION-FileList
+fi
+}
+
+#############################################
+# Grabbing a working mirror                 #
+#############################################
+function FUNCTION-FileList()
 {
 cd /tmp
 if [ -f /tmp/$filelist ]; then
@@ -61,7 +78,7 @@ else
    fi
 fi
 echo "[ESVA] using $DLHOST as mirror"
-DLLOC=$DLHOST/update/2061
+DLLOC=$DLHOST/update/$sVERSION
 
 FUNCTION-ESVA2059
 }
@@ -78,7 +95,7 @@ echo "[ESVA] - Updating versions of esva-xxx scripts for better handling of no c
 sleep 1
 	cd /usr/local/sbin
     echo "[ESVA] -- Backing up scripts... "
-    tar cvzf pre2061.tgz *
+    tar cvzf pre$sVERSION.tgz *
     rm -f esva-domainshow
     rm -f esva-mwusershow
     /usr/bin/wget $DLLOC/esva-domainshow
@@ -95,7 +112,7 @@ sleep 1
 echo "[ESVA] - Updating Postfix's configuration... "
 sleep 1
     cd /etc/postfix
-    cp main.cf main.cf.pre2061
+    cp main.cf main.cf.pre$sVERSION
     postmap /etc/postfix/virtual
     postconf -e "smtpd_client_restrictions = permit_sasl_authenticated, reject_rbl_client zen.spamhaus.org"
     service postfix reload
@@ -104,7 +121,7 @@ echo "[ESVA] - Tuning httpd to run a bit leaner... "
 sleep 1
     service httpd stop
     cd /etc/httpd/conf/
-    mv httpd.conf httpd.conf.pre2061
+    mv httpd.conf httpd.conf.pre$sVERSION
     /usr/bin/wget $DLLOC/httpd.conf
     chmod 644 httpd.conf
     service httpd start
@@ -114,7 +131,7 @@ sleep 1
     if [ `grep bind-address /etc/my.cnf` ]; then
         echo " -- MySQL is already bound to localhost - skipping... "
     else
-        cp /etc/my.cnf /etc/my.cnf.pre2061
+        cp /etc/my.cnf /etc/my.cnf.pre$sVERSION
         sed -i '/\[mysqld\]/ a bind-address=127.0.0.1' /etc/my.cnf
         service mysqld restart
     fi
@@ -160,12 +177,12 @@ sleep 2
 
  echo "[ESVA] - Backing up yum configs "
  sleep 1
- mv /etc/yum.conf /etc/yum.conf.pre2061
+ mv /etc/yum.conf /etc/yum.conf.pre$sVERSION
  
  echo "[ESVA] - Setting new yum configs "
  cd /etc/
  /usr/bin/wget $DLLOC/yum.conf
- mv /etc/yum.repos.d/rpmforge.repo /etc/yum.repos.d/rpmforge.repo.pre2061
+ mv /etc/yum.repos.d/rpmforge.repo /etc/yum.repos.d/rpmforge.repo.pre$sVERSION
  cd /etc/yum.repos.d
  /usr/bin/wget $DLLOC/rpmforge.repo
  
@@ -335,10 +352,23 @@ echo "[ESVA] Changing links in the webinterface"
 
 echo "[ESVA] Done changing links in the webinterface"
 
-FUNCTION-IssueFile
+FUNCTION-esva-update-File
 }
 #############################################
 
+#############################################
+# Update esva-update file		    #
+#############################################
+function FUNCTION-esva-update-File()
+{
+
+echo "[ESVA] Creating new esva-update file"
+cd /usr/local/sbin/
+wget $DLLOC/esva-update
+chmod 755 esva-update
+
+FUNCTION-IssueFile
+}
 #############################################
 # Write new issue file			    #
 #############################################
@@ -346,10 +376,10 @@ function FUNCTION-IssueFile()
 {
 echo "[ESVA] Writing new issue file. "
 sleep 1
-mv /etc/issue /etc/issue.pre2061
+mv /etc/issue /etc/issue.pre$sVERSION
 echo " *********************************************** " > /etc/issue
 echo " * Email Security Virtual Appliance (ESVA)     * " >> /etc/issue
-echo " * v 2.0.6.1 			             * " >> /etc/issue
+echo " * v $VERSION 			             * " >> /etc/issue
 echo " *                                             * " >> /etc/issue
 echo " * http://www.esvacommunity.com/               * " >> /etc/issue
 echo " *                                             * " >> /etc/issue
@@ -371,9 +401,9 @@ function FUNCTION-VersionFile()
 {
 echo "[ESVA] Writing new version file. "
 sleep 2
-mv /var/esva/2061.started /var/esva/2061
-echo "# 2.0.6.1   #">/var/esva/currentversion
-echo "[ESVA] Completed the 2.0.6.1 update at " `date`
+mv /var/esva/$sVERSION.started /var/esva/$sVERSION
+echo "$VERSION">/var/esva/currentversion
+echo "[ESVA] Completed the $VERSION update at " `date`
 sleep 2
 init 6 
 }
@@ -387,9 +417,9 @@ echo "[ESVA] Did you make a snapshot of your system?  "
 echo "[ESVA] You will now have 20 Seconds to abort (CTRL C) "
 sleep 20
 
-echo "[ESVA] Staring ESVA 2.0.6.1 update "
-touch /var/esva/2061.started
+echo "[ESVA] Staring ESVA $VERSION update "
+touch /var/esva/$sVERSION.started
 
-FileList
+VersionCheck
 #############################################
 #EOF
