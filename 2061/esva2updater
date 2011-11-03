@@ -311,7 +311,7 @@ echo 'exclude=perl-IO perl-Scalar-List-Utils perl-bignum perl-Test-Harness perl-
 
 yum update -y
 
-echo "[ESVA] Done Upgrading mailscanner to 4.84.3-1 "
+echo "[ESVA] Done Upgrading the System"
 sleep 2
 
 FUNCTION-PingHome

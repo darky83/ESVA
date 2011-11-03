@@ -2,19 +2,21 @@
 2.0.6.1 Development TODO list
 -----------------------------
 
-:Last update:	20111101
+:Last update:	20111103
 
 
 In no particular order:
 
+- Create new image file for new installations.
+- Test update script
+
+Done:
 - Update esva-update script to check multiple hosts
 - Add mirror list feature for update downloads.
 - Decide what to do with ping home feature.
 - Upgrade CENTOS to final 5.x version (5.7).
+- Change links in webinterface to esvacommunity.
+- Change logo in webinterface.
 - Upgrade SpamAssassin to latest version.
 - Upgrade MailScanner to latest version.
 - Upgrade CLAM AV to latest version.
-- Change links in webinterface to esvacommunity.
-- Change logo in webinterface.
-- Create new image file for new installations.
-- Test update script
