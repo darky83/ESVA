@@ -29,7 +29,7 @@ PM3="http://www.troublenow.org/esva"
 #############################################
 function VersionCheck()
 {
-if [ `cat /var/esva/currentversion` == $VERSION ]; then
+if [ "`cat /var/esva/currentversion`" == $VERSION ]; then
    echo "[ESVA] You are already running version $VERSION, no update needed"
    exit 0
 else

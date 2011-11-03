@@ -87,6 +87,9 @@ wget $DLLOC/esva2updater
 chmod 700 esva2updater
 
 echo "[ESVA] Staring update, log saved in /var/log/esva2updater.log"
+if [ -f /var/log/esva2updater.log ]; then
+   mv /var/log/esva2updater.log /var/log/esva2updater.log.old
+fi
 logsave -a /var/log/esva2updater.log /tmp/esva2updater
 
 }
