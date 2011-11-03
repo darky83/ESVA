@@ -25,7 +25,7 @@ PM3="http://www.troublenow.org/esva"
 #############################################
 
 #############################################
-# Grabbing a working mirror                 #
+# Check the Version                         #
 #############################################
 function VersionCheck()
 {

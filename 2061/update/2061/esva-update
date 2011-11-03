@@ -3,18 +3,100 @@
 # This script will update your ESVA 2.x to the latest version
 # 
 #############################################
-# Start update                              #
+# Options                                   #
 #############################################
+
+filelist=filelist.txt
+
+PM1="http://www.esvacommunity.com"
+PM2="http://www.global-domination.org"
+PM3="http://www.troublenow.org/esva"
+#############################################
+
+#############################################
+# Check User                                #
+#############################################
+function FUNCTION-UserCheck()
+{
+if [ `whoami` == root ]; then
+   echo "[ESVA] Good you are root"
+   FUNCTION-FileList
+else
+   echo "[ESVA] Please become root to run this update"
+   exit 0
+fi
+}
+#############################################
+
+#############################################
+# Pick a Mirror                             #
+#############################################
+function FUNCTION-FileList()
+{
 cd /tmp
-rm -f esva2updater
+if [ -f /tmp/$filelist ]; then
+   mv $filelist $filelist.old
+fi
+
+echo "[ESVA] Grabbing file list from $PM1"
+wget $PM1/$filelist
+if [ -f /tmp/$filelist ]; then
+   if [ "`head -1 $filelist`" == '#ESVA-FILELIST#' ]; then
+      echo "[ESVA] Got a filelist."
+      DLHOST="$PM1"
+   fi
+else
+   echo "[ESVA] failed to get $PM1/$filelist trying second server."
+   wget $PM2/$filelist
+   if [ -f /tmp/$filelist ]; then
+      if [ "`head -1 $filelist`" == '#ESVA-FILELIST#' ]; then
+         echo "[ESVA] Got a filelist."
+         DLHOST="$PM2"
+      fi
+   else
+      echo "[ESVA] failed to get $PM2/$filelist trying last server."
+      wget $PM3/$filelist
+      if [ -f /tmp/$filelist ]; then
+         if [ "`head -1 $filelist`" == '#ESVA-FILELIST#' ]; then
+            echo "[ESVA] Got a filelist."
+            DLHOST="$PM3"
+         fi
+      else
+         echo "[ESVA] No available servers to get the file list, please try again later"
+      fi
+   fi
+fi
+echo "[ESVA] using $DLHOST as mirror"
+DLLOC=$DLHOST/update/
+
+FUNCTION-Update
+}
+#############################################
+
+#############################################
+# Get the update file                       #
+#############################################
+function FUNCTION-Update()
+{
+
+if [ -f /tmp/esva2updater]; then
+  rm -f esva2updater
+fi
+
+wget $DLLOC/esva2updater
 chmod 700 esva2updater
-logsave -a /tmp/esva2updater.log ./esva2updater
 
-#wget http://www.global-domination.org/download/esva2updater
+logsave -a /var/log/esva2updater.log /tmp/esva2updater
 
-echo "#####################################"
-echo "#   Finished updating your system   #"
-echo "# You are now running ESVA version  #"
-cat /var/esva/currentversion
-echo "#   http://www.esvacommunity.com	  #"
-echo "#####################################"
+}
+#############################################
+
+
+#############################################
+# Where to start                            #
+#############################################
+echo "[ESVA] Starting ESVA update process"
+
+FUNCTION-UserCheck
+#############################################
+#EOF
