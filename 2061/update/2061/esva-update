@@ -78,7 +78,7 @@ FUNCTION-Update
 #############################################
 function FUNCTION-Update()
 {
-
+echo "[ESVA] Downloading new update file"
 if [ -f /tmp/esva2updater]; then
   rm -f esva2updater
 fi
@@ -86,6 +86,7 @@ fi
 wget $DLLOC/esva2updater
 chmod 700 esva2updater
 
+echo "[ESVA] Staring update, log saved in /var/log/esva2updater.log"
 logsave -a /var/log/esva2updater.log /tmp/esva2updater
 
 }
