@@ -382,7 +382,7 @@ sleep 1
 mv /etc/issue /etc/issue.pre$sVERSION
 echo " *********************************************** " > /etc/issue
 echo " * Email Security Virtual Appliance (ESVA)     * " >> /etc/issue
-echo " * v $VERSION 			             * " >> /etc/issue
+echo " * v $VERSION 	  		               * " >> /etc/issue
 echo " *                                             * " >> /etc/issue
 echo " * http://www.esvacommunity.com/               * " >> /etc/issue
 echo " *                                             * " >> /etc/issue
