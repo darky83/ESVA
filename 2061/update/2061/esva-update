@@ -79,7 +79,7 @@ FUNCTION-Update
 function FUNCTION-Update()
 {
 echo "[ESVA] Downloading new update file"
-if [ -f /tmp/esva2updater]; then
+if [ -f /tmp/esva2updater ]; then
   rm -f esva2updater
 fi
 
