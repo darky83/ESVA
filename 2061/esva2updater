@@ -329,7 +329,9 @@ function FUNCTION-PingHome()
 echo "[ESVA] Modifying PingHome"
 sleep 2
 
-rm /etc/cron.monthly/GD-Check
+if [ -f /etc/cron.monthly/GD-Check ]; then
+   rm /etc/cron.monthly/GD-Check
+fi
 cd /etc/cron.monthly
 wget $DLLOC/Ping-Home
 chmod 755 Ping-Home
