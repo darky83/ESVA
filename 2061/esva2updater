@@ -367,6 +367,10 @@ function FUNCTION-esva-update-File()
 
 echo "[ESVA] Creating new esva-update file"
 cd /usr/local/sbin/
+if [ -f esva-update ]; then
+   rm esva-update
+fi
+
 wget $DLLOC/esva-update
 chmod 755 esva-update
 
