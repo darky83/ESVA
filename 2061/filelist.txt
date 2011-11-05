@@ -1,0 +1,11 @@
+#ESVA-FILELIST#
+esva2updater
+update/2061/esva-domainshow
+update/2061/ESVA-logo.gif
+update/2061/esva-mwusershow
+update/2061/esva-update
+update/2061/httpd.conf
+update/2061/KAM.cf.sh
+update/2061/Ping-Home
+update/2061/rpmforge.repo
+update/2061/yum.conf
