@@ -3,9 +3,10 @@
 ---------------
 Changes to files are documented here
 
-------------------
-File: esva2updater
-------------------
+-------------------------
+File: update/esva2updater
+-------------------------
+20111105 - Changed filelist location
 20111103 - Added VersionCheck
 	   Cleaned up code
            Added esva-update File replacement
@@ -15,18 +16,20 @@ File: esva2updater
 20111031 - Modified script to use bash functions
 20111030 - Created initial file (main source 2061UO script)
 
+-------------------------
+File: update/filelist.txt
+-------------------------
+20111105 - Created initial file
 
 -------------------------------
 File: update/2061/ESVA-logo.gif
 -------------------------------
 20111101 - Created initial file (modified url in logo)
 
-
 ---------------------------
 File: update/2061/KAM.cf.sh
 ---------------------------
 20111101 - Created initial file (esva 2059 version)
-
 
 ---------------------------
 File: update/2061/Ping-Home
@@ -39,12 +42,10 @@ File: update/2061/esva-domainshow
 ---------------------------------
 20111101 - Created initial file (esva 2059 version)
 
-
 ---------------------------------
 File: update/2061/esva-mwusershow
 --------------------------------
 20111101 - Created initial file (esva 2059 version)
-
 
 -----------------------------
 File: update/2061/esva-update
@@ -58,12 +59,10 @@ File: update/2061/httpd.conf
 ----------------------------
 20111101 - Created initial file (esva 2059 version)
 
-
 -------------------------------
 File: update/2061/rpmforge.repo
 -------------------------------
 20111101 - Created initial file
-
 
 --------------------------
 File: update/2061/yum.conf

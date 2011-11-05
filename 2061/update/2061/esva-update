@@ -5,7 +5,6 @@
 #############################################
 # Options                                   #
 #############################################
-
 filelist=filelist.txt
 
 PM1="http://www.esvacommunity.com"
@@ -39,7 +38,7 @@ if [ -f /tmp/$filelist ]; then
 fi
 
 echo "[ESVA] Grabbing file list from $PM1"
-wget $PM1/$filelist
+wget $PM1/update/$filelist
 if [ -f /tmp/$filelist ]; then
    if [ "`head -1 $filelist`" == '#ESVA-FILELIST#' ]; then
       echo "[ESVA] Got a filelist."
@@ -47,7 +46,7 @@ if [ -f /tmp/$filelist ]; then
    fi
 else
    echo "[ESVA] failed to get $PM1/$filelist trying second server."
-   wget $PM2/$filelist
+   wget $PM2/update/$filelist
    if [ -f /tmp/$filelist ]; then
       if [ "`head -1 $filelist`" == '#ESVA-FILELIST#' ]; then
          echo "[ESVA] Got a filelist."
@@ -55,7 +54,7 @@ else
       fi
    else
       echo "[ESVA] failed to get $PM2/$filelist trying last server."
-      wget $PM3/$filelist
+      wget $PM3/update/$filelist
       if [ -f /tmp/$filelist ]; then
          if [ "`head -1 $filelist`" == '#ESVA-FILELIST#' ]; then
             echo "[ESVA] Got a filelist."
@@ -91,10 +90,8 @@ if [ -f /var/log/esva2updater.log ]; then
    mv /var/log/esva2updater.log /var/log/esva2updater.log.old
 fi
 logsave -a /var/log/esva2updater.log /tmp/esva2updater
-
 }
 #############################################
-
 
 #############################################
 # Where to start                            #
